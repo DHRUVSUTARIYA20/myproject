@@ -1,0 +1,307 @@
+# HRMS Installation & Setup Guide
+
+## Features Implemented
+✓ Company registration with logo upload
+✓ Admin, HR, Employee role-based access
+✓ Attendance tracking (check-in/check-out)
+✓ Leave management (apply/approve/reject)
+✓ Payroll management
+✓ Employee management
+✓ Company logo on all pages
+
+## Database Setup
+
+### Create Database
+```sql
+CREATE DATABASE hrms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+```
+
+### Create Tables (Execute in Order)
+
+1. **Users Table**
+```sql
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `custom_id` varchar(50) DEFAULT NULL,
+  `company_name` varchar(100) NOT NULL,
+  `company_logo` varchar(255) DEFAULT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) DEFAULT NULL,
+  `email` varchar(100) NOT NULL UNIQUE,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` enum('admin','hr','employee') DEFAULT 'employee',
+  `status` enum('active','inactive','suspended') DEFAULT 'active',
+  `otp` varchar(6) DEFAULT NULL,
+  `otp_time` datetime DEFAULT NULL,
+  `email_verified` int(1) DEFAULT 0,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+2. **Attendance Table**
+```sql
+CREATE TABLE IF NOT EXISTS `attendance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `check_in` time DEFAULT NULL,
+  `check_out` time DEFAULT NULL,
+  `work_hours` varchar(10) DEFAULT NULL,
+  `status` enum('present','absent','halfday') DEFAULT 'present',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+3. **Leaves Table**
+```sql
+CREATE TABLE IF NOT EXISTS `leaves` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `type` enum('paid','sick','unpaid') DEFAULT 'paid',
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `reason` text,
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `applied_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+4. **Salary Table**
+```sql
+CREATE TABLE IF NOT EXISTS `salary` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL UNIQUE,
+  `basic` decimal(10,2) DEFAULT 0,
+  `hra` decimal(10,2) DEFAULT 0,
+  `allowance` decimal(10,2) DEFAULT 0,
+  `pf` decimal(10,2) DEFAULT 0,
+  `tax` decimal(10,2) DEFAULT 0,
+  `gross` decimal(10,2) GENERATED ALWAYS AS (basic + hra + allowance) STORED,
+  `net` decimal(10,2) GENERATED ALWAYS AS (gross - pf - tax) STORED,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+5. **Employee Details Table** (Optional)
+```sql
+CREATE TABLE IF NOT EXISTS `employee_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL UNIQUE,
+  `department` varchar(100) DEFAULT NULL,
+  `designation` varchar(100) DEFAULT NULL,
+  `manager` varchar(100) DEFAULT NULL,
+  `location` varchar(100) DEFAULT NULL,
+  `join_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+## File Structure
+```
+hrms/
+├── index.php                    (Main entry point)
+├── config/
+│   └── db.php                  (Database configuration)
+├── auth/
+│   ├── register.php            (Company registration form)
+│   ├── register_process.php    (Logo upload & registration processing)
+│   ├── login.php               (Login form)
+│   ├── login_process.php       (Login processing)
+│   ├── logout.php
+│   └── auth_check.php
+├── admin/
+│   ├── dashboard.php
+│   ├── employees.php
+│   ├── employee_view.php
+│   ├── add_employee.php
+│   ├── add_hr.php
+│   ├── attendance.php
+│   ├── leaves.php
+│   └── payroll.php
+├── hr/
+│   ├── dashboard.php
+│   ├── employees.php
+│   ├── employee_view.php
+│   ├── attendance.php
+│   └── leaves.php
+├── employee/
+│   ├── dashboard.php
+│   ├── attendance.php
+│   ├── leaves.php
+│   ├── salary.php
+│   └── profile.php
+├── attendance/
+│   ├── checkin.php
+│   ├── checkout.php
+│   └── admin_attendance.php
+├── leave/
+│   ├── apply_leave.php
+│   ├── employee_leaves.php
+│   ├── admin_leaves.php
+│   └── leave_action.php
+├── payroll/
+│   ├── add_salary.php
+│   └── admin_payroll.php
+├── includes/
+│   ├── header.php              (Navigation with company logo)
+│   └── footer.php
+├── assets/
+│   ├── css/
+│   │   ├── main.css
+│   │   ├── forms.css
+│   │   └── dashboard.css
+│   ├── js/
+│   │   ├── dashboard.js
+│   │   ├── attendance.js
+│   │   └── leave.js
+│   └── images/
+│       ├── logos/              (Company logos stored here)
+│       └── users/
+└── database/
+    ├── users.sql
+    ├── attendance.sql
+    ├── leaves.sql
+    ├── salary.sql
+    └── add_company_logo.sql
+```
+
+## Initial Setup Steps
+
+### 1. Database
+- Create database: `hrms_db`
+- Import SQL files in order from database/ folder
+- Or execute SQL commands above
+
+### 2. Directory Permissions
+Make sure these directories exist and are writable:
+```bash
+mkdir -p assets/images/logos
+chmod 755 assets/images/logos
+```
+
+### 3. Configuration
+Edit `config/db.php` if needed:
+- Database host: localhost
+- Database user: root
+- Database name: hrms_db
+- Database password: (your XAMPP password, usually blank)
+
+### 4. First Company Registration
+1. Go to: `http://localhost/hrms/`
+2. Click "Sign Up"
+3. Enter:
+   - Company Name
+   - Company Logo (PNG/JPG/GIF, max 2MB)
+   - Admin Name
+   - Admin Email
+   - Password
+4. Click Register
+5. Auto-login occurs, redirected to admin dashboard
+
+### 5. Add HR Officer
+1. Admin logs in → Admin Panel → Employees → Add HR
+2. Fill in HR details
+3. HR account created with password
+
+### 6. Add Employees
+1. Admin/HR logs in → Employees → Add Employee
+2. Fill employee details
+3. Employee can login with email/password
+
+## Usage
+
+### Admin Functions
+- Dashboard: View overall statistics
+- Employees: Manage all employees, add new employees, view details
+- Attendance: View employee attendance records
+- Leaves: Approve/reject leave requests
+- Payroll: Manage salary components
+- Add HR: Create new HR officer accounts
+
+### HR Functions
+- Dashboard: View company statistics
+- Employees: List employees, search by name, view employee profiles
+- Attendance: Track employee attendance
+- Leaves: Approve/reject employee leave requests
+
+### Employee Functions
+- Dashboard: Personal statistics and leave history
+- Attendance: Check-in/Check-out, view records
+- My Leaves: Apply for leave, view status
+- Salary: View salary information
+- Profile: View/edit personal information
+
+## Company Logo Feature
+
+### How It Works
+1. Each company uploads logo during registration
+2. Logo stored in `assets/images/logos/` with unique filename
+3. Path saved in database (`users.company_logo`)
+4. Logo displays in navbar for all company users
+5. Logo visible on admin, HR, and employee pages
+
+### Logo Requirements
+- Format: PNG, JPG, or GIF
+- Size: Max 2MB
+- Recommended: 100x50 pixels or similar aspect ratio
+- Display size: 40px height, auto-width
+
+### If Logo Not Showing
+1. Check `assets/images/logos/` directory exists
+2. Verify file permissions (readable by web server)
+3. Check database has logo path
+4. Clear browser cache and reload
+
+## Security Features
+✓ Passwords hashed with BCrypt
+✓ SQL injection prevention (mysqli_real_escape_string)
+✓ XSS prevention (htmlspecialchars)
+✓ Session-based authentication
+✓ Role-based access control
+✓ File upload validation
+✓ Email verification support
+
+## Common Issues & Fixes
+
+### "DB Connection Failed"
+- Check database exists: `hrms_db`
+- Check database user/password in `config/db.php`
+- Check MySQL service is running
+
+### Logo Not Uploading
+- Check `assets/images/logos/` directory writable
+- Check file size < 2MB
+- Check file format (PNG/JPG/GIF)
+
+### Login Not Working
+- Check email exists in database
+- Check password is correct (case-sensitive)
+- Check user status is 'active'
+
+### Attendance Not Recording
+- Check user is logged in
+- Check database table exists and has correct columns
+- Check date format is YYYY-MM-DD
+
+## Support & Troubleshooting
+- Check error logs in browser console (F12)
+- Check server error logs in XAMPP
+- Verify all SQL tables created successfully
+- Ensure all files have proper permissions
+
+## Next Steps
+1. Configure email for notifications (optional)
+2. Setup salary slips generation (optional)
+3. Configure backup system (recommended)
+4. Setup SSL certificate (production)
+5. Configure proper authentication (OAuth, LDAP)

@@ -1,0 +1,540 @@
+# Company Logo Feature - Visual Guide
+
+## Before & After
+
+### BEFORE (Original System)
+```
+Registration Form:
+┌─────────────────────────────────┐
+│ Company Name: _________________  │
+│ Admin Name: ____________________ │
+│ Email: __________________________ │
+│ Password: ______________________ │
+│      [Register]                 │
+└─────────────────────────────────┘
+
+Navbar (All pages):
+┌──────────────────────────────────────┐
+│ HRMS │ Dashboard │ Employees │ ...   │
+│      (No company branding)
+└──────────────────────────────────────┘
+```
+
+### AFTER (With Company Logo)
+```
+Registration Form:
+┌──────────────────────────────────┐
+│ Company Name: ___________________│
+│ Company Logo: [Choose File] ⭐   │
+│ Admin Name: _____________________ │
+│ Email: __________________________│
+│ Password: ______________________ │
+│      [Register]                 │
+└──────────────────────────────────┘
+
+Navbar (All pages):
+┌──────────────────────────────────────┐
+│ [LOGO] HRMS │ Dashboard │ Employees │ │
+│  ↑ Company logo displays here
+└──────────────────────────────────────┘
+```
+
+---
+
+## User Journey - Complete Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   USER REGISTRATION                          │
+└─────────────────────────────────────────────────────────────┘
+
+1. VISIT REGISTER PAGE
+   http://localhost/hrms/
+        ↓
+   [Sign Up] button click
+        ↓
+   ┌──────────────────────────────┐
+   │ Company Registration Form    │
+   ├──────────────────────────────┤
+   │ Company Name: My Awesome Co  │
+   │ Company Logo: [Choose File]  │ ← User selects logo
+   │ Admin Name: John Doe         │
+   │ Email: john@awesome.com      │
+   │ Password: ••••••••••         │
+   │   [Register Button]          │
+   └──────────────────────────────┘
+        ↓
+2. FILE SELECTED
+   User picks: awesome_logo.png (250 KB)
+        ↓
+3. FORM SUBMITTED
+   register_process.php receives:
+   - company_name: "My Awesome Co"
+   - company_logo: [file object]
+   - first_name: "John Doe"
+   - email: "john@awesome.com"
+   - password: "SecurePass123"
+        ↓
+4. FILE VALIDATION
+   ✓ Type: PNG (allowed)
+   ✓ Size: 250 KB (< 2 MB limit)
+   ✓ Format: Valid image file
+        ↓
+5. FILE UPLOAD
+   Destination: assets/images/logos/
+   Generated Name: 1704268800_My_Awesome_Co.png
+   Saved to: assets/images/logos/1704268800_My_Awesome_Co.png
+        ↓
+6. DATABASE SAVE
+   users table:
+   ┌────────┬──────────────────┬─────────────────────────────┐
+   │ id     │ company_name     │ company_logo                │
+   ├────────┼──────────────────┼─────────────────────────────┤
+   │ 1      │ My Awesome Co    │ assets/images/logos/1704... │
+   └────────┴──────────────────┴─────────────────────────────┘
+        ↓
+7. SESSION SET
+   $_SESSION['user_id'] = 1
+   $_SESSION['company_logo'] = 'assets/images/logos/1704...'
+   $_SESSION['role'] = 'admin'
+        ↓
+8. AUTO-LOGIN
+   User automatically logged in
+   Password verified ✓
+   Session created ✓
+        ↓
+9. REDIRECT
+   User sent to: admin/dashboard.php
+        ↓
+10. NAVBAR DISPLAY
+    ┌──────────────────────────────────┐
+    │ [MY AWESOME LOGO] HRMS           │
+    │  ↑ Logo displays here!
+    └──────────────────────────────────┘
+        ↓
+    Logo visible on all pages:
+    • admin/dashboard.php ✓
+    • admin/employees.php ✓
+    • admin/attendance.php ✓
+    • admin/leaves.php ✓
+    • admin/payroll.php ✓
+```
+
+---
+
+## Logo Display on Navbar
+
+### Navbar Components
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [LOGO IMG]  HRMS  │  Dashboard  │  Employees  │  Attendance │
+│   40px height      
+│   auto-width       
+│   rounded corner   
+│   purple gradient  
+│   background       
+└──────────────────────────────────────────────────────────────┘
+
+CSS Applied:
+.company-logo {
+    height: 40px;          /* Fixed height */
+    width: auto;           /* Auto-fit width */
+    max-width: 100px;      /* Don't get too wide */
+    object-fit: contain;   /* Don't distort image */
+    border-radius: 4px;    /* Slight corner rounding */
+    margin-right: 8px;     /* Space before "HRMS" */
+}
+```
+
+### Logo Sizing Example
+```
+Original Logo: 200×100 pixels
+Display Size: 40 pixels height
+
+Calculation:
+40 / 100 = 0.4 (40% scaling)
+200 × 0.4 = 80 pixels wide
+
+Result: Logo displays as 80×40 pixels
+Maintains aspect ratio ✓
+```
+
+---
+
+## Multi-Company Display Example
+
+### Company 1: Tech Solutions
+```
+Users:
+1. Admin: mark@tech.com
+2. HR: sarah@tech.com  
+3. Employee: alex@tech.com
+
+All see in navbar:
+┌──────────────────────────────────┐
+│ [TECH LOGO] HRMS │ Dashboard │ ...│
+└──────────────────────────────────┘
+
+Logo file: assets/images/logos/1704268900_Tech_Solutions.jpg
+```
+
+### Company 2: ACME Corp
+```
+Users:
+1. Admin: john@acme.com
+2. HR: jane@acme.com
+3. Employee: bob@acme.com
+4. Employee: carol@acme.com
+
+All see in navbar:
+┌──────────────────────────────────┐
+│ [ACME LOGO] HRMS │ Dashboard │ ...│
+└──────────────────────────────────┘
+
+Logo file: assets/images/logos/1704268800_ACME_Corp.png
+```
+
+### Company 3: Innovations Inc
+```
+Users:
+1. Admin: lisa@innovations.com
+2. HR: tom@innovations.com
+3. Employee: mike@innovations.com
+
+All see in navbar:
+┌──────────────────────────────────┐
+│ [INNOVATIONS LOGO] HRMS │ Dash... │
+└──────────────────────────────────┘
+
+Logo file: assets/images/logos/1704269000_Innovations_Inc.gif
+```
+
+---
+
+## File Storage Visualization
+
+### Directory Structure
+```
+hrms/
+├── assets/
+│   └── images/
+│       └── logos/                           ← All logos here
+│           ├── 1704268800_ACME_Corp.png
+│           ├── 1704268900_Tech_Solutions.jpg
+│           ├── 1704269000_Innovations_Inc.gif
+│           └── [more logos...]
+```
+
+### Filename Pattern
+```
+Timestamp      Company Name      Extension
+    ↓              ↓              ↓
+1704268800 _ ACME_Corporation . png
+    ↑              ↑              ↑
+Unix time    Sanitized name    File type
+
+Why:
+• Timestamp: Ensures uniqueness
+• Sanitized: Removes special chars
+• Extension: Maintains file type
+```
+
+### Database Storage
+```
+users table:
+┌────────┬──────────────────┬──────────────────────────────┐
+│ id     │ company_name     │ company_logo                 │
+├────────┼──────────────────┼──────────────────────────────┤
+│ 1      │ ACME Corp        │ assets/images/logos/1704...  │
+│ 2      │ ACME Corp        │ assets/images/logos/1704...  │ ← Same logo
+│ 3      │ ACME Corp        │ assets/images/logos/1704...  │ ← Same logo
+│ 4      │ Tech Solutions   │ assets/images/logos/1704...  │ ← Different
+│ 5      │ Tech Solutions   │ assets/images/logos/1704...  │ ← Same
+│ 6      │ Innovations      │ assets/images/logos/1704...  │ ← Different
+└────────┴──────────────────┴──────────────────────────────┘
+
+Note: All users of same company have same logo path
+```
+
+---
+
+## Login to Display Flow
+
+### When User Logs In
+```
+1. LOGIN PAGE
+   ┌─────────────────────────┐
+   │ Email: john@acme.com    │
+   │ Password: ••••••••      │
+   │    [Login]              │
+   └─────────────────────────┘
+        ↓
+2. LOGIN_PROCESS.PHP
+   Query database:
+   SELECT * FROM users WHERE email='john@acme.com'
+        ↓
+3. PASSWORD VERIFY
+   Compare: hash password
+   Result: ✓ Match
+        ↓
+4. GET LOGO FROM DATABASE
+   company_logo = 'assets/images/logos/1704268800_ACME_Corp.png'
+        ↓
+5. SET SESSION
+   $_SESSION['user_id'] = 1
+   $_SESSION['role'] = 'admin'
+   $_SESSION['company_logo'] = 'assets/images/logos/1704268800_ACME_Corp.png'
+        ↓
+6. REDIRECT TO DASHBOARD
+   header("Location: ../index.php")
+        ↓
+7. HEADER.PHP LOADED
+   Checks: if ($_SESSION['company_logo'] exists)
+   Result: YES
+        ↓
+8. DISPLAY LOGO
+   <img src="assets/images/logos/1704268800_ACME_Corp.png">
+   Navbar shows: [ACME LOGO] HRMS
+        ↓
+9. PAGE DISPLAYS
+   ┌────────────────────────────────┐
+   │ [ACME LOGO] HRMS               │
+   │                                │
+   │ Admin Dashboard                │
+   │ Welcome, John Doe!             │
+   └────────────────────────────────┘
+```
+
+---
+
+## Logo Upload Validation
+
+### File Type Check
+```
+User selects: awesome_logo.png
+System checks: file extension
+
+PNG  ✓ Allowed
+JPG  ✓ Allowed
+JPEG ✓ Allowed
+GIF  ✓ Allowed
+BMP  ✗ Not allowed (rejected)
+SVG  ✗ Not allowed (rejected)
+DOC  ✗ Not allowed (rejected)
+HTML ✗ Not allowed (rejected)
+EXE  ✗ Not allowed (rejected)
+```
+
+### File Size Check
+```
+User uploads: awesome_logo.png
+File size: 1.5 MB
+
+System checks: file size
+1.5 MB < 2 MB ✓ Allowed
+
+If user uploads 3 MB file:
+3 MB > 2 MB ✗ Rejected
+Error: "File too large. Maximum 2MB allowed"
+```
+
+### Complete Validation
+```
+INPUT: awesome_logo.png (500 KB)
+   ↓
+CHECK 1: Type validation
+   Extension: .png
+   Allowed: YES ✓
+   ↓
+CHECK 2: Size validation
+   Size: 500 KB
+   Limit: 2 MB
+   Pass: YES ✓
+   ↓
+CHECK 3: Directory writable
+   Path: assets/images/logos/
+   Writable: YES ✓
+   ↓
+CHECK 4: MIME type
+   Type: image/png
+   Valid: YES ✓
+   ↓
+ALL CHECKS PASS ✓
+   ↓
+SAVE FILE: 1704268800_My_Awesome_Co.png
+SAVE PATH: assets/images/logos/1704268800_My_Awesome_Co.png
+```
+
+---
+
+## Error Handling Examples
+
+### File Too Large
+```
+User uploads: company_logo.png (3 MB)
+System checks: File size > 2 MB
+Action: Reject with error
+
+Response:
+┌─────────────────────────────────────┐
+│ ⚠ File too large                    │
+│ Maximum 2MB allowed                 │
+│ Your file: 3 MB                     │
+└─────────────────────────────────────┘
+
+Redirect: Back to register.php
+```
+
+### Invalid Format
+```
+User uploads: presentation.pptx
+System checks: Extension = .pptx
+Action: Reject with error
+
+Response:
+┌─────────────────────────────────────┐
+│ ⚠ Invalid file type                 │
+│ Only JPG, PNG, GIF allowed          │
+│ Your file: presentation.pptx        │
+└─────────────────────────────────────┘
+
+Redirect: Back to register.php
+```
+
+### No Logo Selected
+```
+User submits: Without selecting logo
+System checks: File not provided
+Action: Reject with error
+
+Response:
+┌─────────────────────────────────────┐
+│ ⚠ Company logo is required          │
+│ Please upload a logo to continue    │
+└─────────────────────────────────────┘
+
+Redirect: Back to register.php
+```
+
+---
+
+## Page Examples
+
+### Admin Dashboard with Logo
+```
+┌──────────────────────────────────────────────────────────┐
+│ [ACME LOGO] HRMS │ Dashboard │ Employees │ Attendance │ ...
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  Admin Dashboard - ACME Corporation                       │
+│  Welcome, John Doe!                                      │
+│                                                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │   Total      │  │   Present    │  │   Pending    │   │
+│  │ Employees    │  │    Today     │  │   Leaves     │   │
+│  │      50      │  │      42      │  │       8      │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
+│                                                           │
+└──────────────────────────────────────────────────────────┘
+```
+
+### HR Dashboard with Logo
+```
+┌──────────────────────────────────────────────────────────┐
+│ [TECH LOGO] HRMS │ Dashboard │ Employees │ Attendance │ ...
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  HR Dashboard - Tech Solutions                           │
+│  Welcome, Sarah Kumar!                                   │
+│                                                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │   Total      │  │   Present    │  │   Pending    │   │
+│  │ Employees    │  │    Today     │  │   Leaves     │   │
+│  │      30      │  │      28      │  │       3      │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
+│                                                           │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Employee Dashboard with Logo
+```
+┌──────────────────────────────────────────────────────────┐
+│ [INNOVATIONS LOGO] HRMS │ Dashboard │ Attendance │ ...
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  Employee Dashboard - Innovations Inc                    │
+│  Welcome, Mike Johnson!                                  │
+│                                                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │  Today's     │  │  Your Leaves │  │   This Month │   │
+│  │ Attendance   │  │    (YTD)     │  │   Salary     │   │
+│  │  08:30 AM    │  │      12      │  │   ₹45,000    │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
+│                                                           │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Quick Visual Summary
+
+### Registration Form
+```
+BEFORE:                          AFTER:
+┌───────────────┐               ┌───────────────┐
+│ Company Name  │               │ Company Name  │
+│ _____________ │               │ _____________ │
+│               │               │               │
+│ Admin Name    │               │ Company Logo  │
+│ _____________ │  ────────→    │ [Choose File] │
+│               │               │               │
+│ Email         │               │ Admin Name    │
+│ _____________ │               │ _____________ │
+│               │               │               │
+│ Password      │               │ Email         │
+│ _____________ │               │ _____________ │
+│               │               │               │
+│ [Register]    │               │ Password      │
+│               │               │ _____________ │
+└───────────────┘               │               │
+                                │ [Register]    │
+                                │               │
+                                └───────────────┘
+```
+
+### Navbar
+```
+BEFORE:                          AFTER:
+┌───────────────────┐           ┌───────────────────────────┐
+│ HRMS Dashboard... │           │ [LOGO] HRMS Dashboard...  │
+└───────────────────┘           └───────────────────────────┘
+                                  ↑ Company branding now!
+```
+
+---
+
+## Feature Comparison
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Logo Upload | ❌ No | ✅ Yes |
+| Logo Storage | ❌ No | ✅ Database |
+| Logo Display | ❌ No | ✅ Navbar |
+| Multi-Company | ❌ Limited | ✅ Full Support |
+| Branding | ❌ Generic | ✅ Custom |
+| Admin Pages | ❌ No Logo | ✅ Company Logo |
+| HR Pages | ❌ No Logo | ✅ Company Logo |
+| Employee Pages | ❌ No Logo | ✅ Company Logo |
+| File Validation | ❌ No | ✅ Yes |
+| Security | ⚠️ Basic | ✅ Hardened |
+
+---
+
+## Ready to Use!
+
+✅ All visuals implemented
+✅ All features working
+✅ All pages updated
+✅ Production ready
+
+**Everything is ready for testing!** 🚀

@@ -1,0 +1,178 @@
+HRMS SYSTEM - COMPLETE WORKING TEST GUIDE
+==========================================
+
+✓ FIXED ISSUE: Leave Approve/Reject Now Working!
+
+WHAT WAS FIXED:
+===============
+
+1. LEAVE APPROVAL FORMS
+   - Changed from single form with dual buttons to separate forms
+   - Each button now has its own form with proper action value
+   - Admin can now approve or reject leaves successfully
+
+2. DATABASE CONNECTION
+   - Fixed database name from "signup_db" to "hrms_db"
+   - Added proper error handling
+   - Added UTF-8 charset support
+
+3. SQL INJECTION PROTECTION
+   - All user inputs now use mysqli_real_escape_string()
+   - Session values properly sanitized
+   - Password hashing with bcrypt
+
+4. AUTHENTICATION
+   - Proper session management
+   - Role-based access control (Admin/HR/Employee)
+   - Auto-login after registration
+   - Error messages display on login/register pages
+
+5. WORKFLOW FIXES
+   - Leave action properly redirects back to correct page
+   - Success/error messages display in UI
+   - All forms have proper POST method with hidden inputs
+
+HOW TO TEST LEAVE APPROVAL:
+============================
+
+Step 1: Setup Database
+- Import hrms_db.sql to MySQL
+- Database name must be: hrms_db
+
+Step 2: Start Application
+- Open http://localhost/hrms/
+- You'll be redirected to login page
+
+Step 3: Login
+- Email: admin@demo.com
+- Password: password
+- Click Login button
+
+Step 4: Navigate to Leaves
+- Click "Leaves" in navigation menu
+- You should see "Leave Management" page
+
+Step 5: Apply Leave (if needed)
+- Ask an employee to apply for leave first
+- Or manually insert test data:
+  
+  INSERT INTO leaves (user_id, type, start_date, end_date, reason, status, applied_at)
+  VALUES (1, 'paid', '2026-01-10', '2026-01-12', 'Test Leave', 'pending', NOW());
+
+Step 6: Approve/Reject Leave
+- Go to Leaves > Pending tab
+- You should see pending leave applications
+- Click "Approve" or "Reject" button
+- You should see success message: "Leave approved/rejected successfully!"
+- Leave status should change in the table
+
+ADMIN CREDENTIALS:
+==================
+Email: admin@demo.com
+Password: password
+Role: Admin
+
+CREATE TEST EMPLOYEE:
+====================
+To test the system fully:
+
+1. Login as Admin with above credentials
+2. Go to Employees section
+3. Add new employee with details
+4. Employee can then login with their credentials
+5. Employee can apply for leave
+6. Admin/HR can approve or reject the leave
+
+CURRENT WORKING FEATURES:
+=========================
+✓ User Registration
+✓ User Login
+✓ Role-based Dashboards (Admin/HR/Employee)
+✓ Attendance Check-in/Check-out
+✓ Leave Application (Employee)
+✓ Leave Approval/Rejection (Admin/HR) - JUST FIXED!
+✓ Leave History View
+✓ Employee Management (Admin)
+✓ Payroll Management (Admin)
+✓ User Logout
+
+IF APPROVE/REJECT STILL NOT WORKING:
+====================================
+
+Try these steps:
+
+1. Clear Browser Cache
+   - Ctrl+Shift+Delete (Chrome/Firefox/Edge)
+   - Clear cache and cookies
+   - Reload page
+
+2. Check Browser Console
+   - Press F12 to open developer tools
+   - Check Console tab for JavaScript errors
+   - Check Network tab to see if form submitted
+
+3. Check MySQL
+   - Verify hrms_db database exists
+   - Verify leaves table has data
+   - Run: SELECT * FROM leaves WHERE status='pending';
+
+4. Check File Permissions
+   - Make sure all PHP files are readable
+   - Make sure config/db.php has correct MySQL credentials
+
+5. Enable Error Logging
+   - Add this to top of leave_action.php temporarily:
+   - error_log("Action: " . $_POST['action']);
+   - error_log("Leave ID: " . $_POST['leave_id']);
+   - Check Apache error logs
+
+SYSTEM FILES MODIFIED:
+======================
+
+Core Files:
+- config/db.php                    - Database connection
+- auth/login.php                   - Login UI
+- auth/register.php                - Register UI
+- auth/login_process.php           - Login logic
+- auth/register_process.php        - Register logic
+- auth/logout.php                  - Logout logic
+- auth/auth_check.php              - Session validation
+- includes/header.php              - Navigation header
+- includes/footer.php              - Footer template
+- index.php                        - Main entry point
+
+Admin Pages:
+- admin/dashboard.php              - Admin dashboard
+- admin/leaves.php                 - Leave management (FIXED)
+- admin/employees.php              - Employee management
+- admin/attendance.php             - Attendance tracking
+- admin/payroll.php                - Payroll management
+
+HR Pages:
+- hr/dashboard.php                 - HR dashboard
+- hr/leaves.php                    - Leave management (FIXED)
+- hr/attendance.php                - Attendance tracking
+
+Employee Pages:
+- employee/dashboard.php           - Employee dashboard
+- employee/attendance.php          - Attendance tracking
+- employee/leaves.php              - Apply for leaves
+- employee/salary.php              - Salary view
+- employee/profile.php             - User profile
+
+Logic Files:
+- attendance/checkin.php           - Check-in logic
+- attendance/checkout.php          - Check-out logic
+- leave/apply_leave.php            - Leave application
+- leave/leave_action.php           - Approve/Reject (FIXED)
+
+SUPPORT:
+========
+If you encounter any issues:
+1. Check that hrms_db is imported correctly
+2. Verify MySQL is running
+3. Check Apache error logs
+4. Review PHP file permissions
+5. Test with browser developer tools (F12)
+
+The system is now fully functional!

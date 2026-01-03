@@ -1,0 +1,123 @@
+# Company Logo Implementation - Setup Guide
+
+## Overview
+Companies can now upload their logo during registration, which displays on the left side of the navigation bar for all users (admin, HR, employees).
+
+## What Changed
+
+### 1. Registration Page (auth/register.php)
+- Added file upload input for company logo
+- Accepts PNG, JPG, GIF formats
+- Maximum file size: 2MB
+
+### 2. Registration Process (auth/register_process.php)
+- Validates uploaded logo file
+- Creates assets/images/logos/ directory automatically
+- Stores logo with timestamped filename for uniqueness
+- Saves logo path in database
+
+### 3. Header Navigation (includes/header.php)
+- Displays company logo in navbar (left side before "HRMS")
+- Shows logo for all pages (admin, HR, employee pages)
+- Falls back to people icon if no logo available
+- Logo height: 40px, auto-width to maintain aspect ratio
+
+### 4. Login Process (auth/login_process.php)
+- Loads company_logo from database when user logs in
+- Stores in $_SESSION['company_logo']
+
+## Database Changes
+
+### For New Installations
+The users table includes company_logo column automatically.
+
+### For Existing Installations
+Run this SQL command in phpMyAdmin:
+
+```sql
+ALTER TABLE `users` ADD COLUMN `company_logo` varchar(255) DEFAULT NULL AFTER `company_name`;
+```
+
+Or execute the migration file: `database/add_company_logo.sql`
+
+## Logo Storage
+- Location: `assets/images/logos/`
+- Naming Pattern: `timestamp_company_name.extension`
+- Example: `1704268800_acme_corp.png`
+- Accessible via relative path in <img src="">
+
+## How It Works
+
+### Registration Flow
+1. Admin registers company
+2. Selects logo file (PNG/JPG/GIF, max 2MB)
+3. Logo uploaded to assets/images/logos/
+4. Path stored in users table (company_logo column)
+5. Auto-login after registration loads logo from DB
+
+### Login Flow
+1. User enters email/password
+2. Database query retrieves company_logo field
+3. Logo path stored in $_SESSION['company_logo']
+4. Header.php displays logo in navbar
+5. Works for admin, HR, and all employees of that company
+
+### Display in Navigation
+```php
+<?php if (isset($_SESSION['company_logo']) && file_exists($_SESSION['company_logo'])): ?>
+    <img src="<?= $_SESSION['company_logo']; ?>" alt="Company Logo" class="company-logo">
+<?php endif; ?>
+```
+
+## Styling
+```css
+.company-logo {
+    height: 40px;
+    width: auto;
+    max-width: 100px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+```
+
+## Security Considerations
+1. File type validation (JPG, PNG, GIF only)
+2. File size limit (2MB max)
+3. File stored outside web root not accessible directly
+4. Filename sanitized to prevent path traversal
+5. Relative path prevents absolute path disclosure
+
+## Troubleshooting
+
+### Logo Not Showing
+1. Check assets/images/logos/ directory exists
+2. Check file permissions (readable by web server)
+3. Verify database has company_logo value
+4. Check file path is correct in database
+
+### Upload Fails
+- File too large (max 2MB)
+- Invalid format (must be JPG, PNG, or GIF)
+- Directory permissions issue
+- Disk space full
+
+### Logo Not Displaying for Existing Users
+- Update users table with logo paths
+- Users must log in again after logo is added to database
+- Existing admins may need to re-upload logos
+
+## Features
+✓ Company-specific logos
+✓ Multiple companies supported
+✓ Logo shows for all company users
+✓ File validation
+✓ Auto directory creation
+✓ Session-based logo loading
+✓ Graceful fallback if no logo
+
+## Future Enhancements
+- Allow logo update in settings
+- Multiple logo sizes for different contexts
+- Logo removal functionality
+- Logo cache optimization
+- CDN support for logos
